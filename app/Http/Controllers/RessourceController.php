@@ -55,4 +55,17 @@ class RessourceController extends Controller
         Ressources::findOrFail($id)->delete();
         return response()->json(null, 204);
     }
+
+    public function attachTag(Request $request, int $id): JsonResponse
+    {
+        $ressource = Ressources::findOrFail($id);
+        $ressource->tags()->syncWithoutDetaching([$request->integer('tag_id')]);
+        return response()->json(null, 204);
+    }
+
+    public function detachTag(int $id, int $tagId): JsonResponse
+    {
+        Ressources::findOrFail($id)->tags()->detach($tagId);
+        return response()->json(null, 204);
+    }
 }
