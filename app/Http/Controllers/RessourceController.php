@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Ressources;
+use App\Services\ResumeService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class RessourceController extends Controller
 {
@@ -14,21 +16,76 @@ class RessourceController extends Controller
         return response()->json($ressources);
     }
 
-    public function create(): JsonResponse
-    {
-        return response()->json(['message' => 'formulaire création']);
-    }
-
     public function store(Request $request): JsonResponse
     {
-        // TODO: valider et créer la ressource
-        return response()->json(['message' => 'ressource créée'], 201);
+        $validated = $request->validate([
+            'url'          => 'required|url|max:2048',
+            'nom_original' => 'nullable|string|max:150',
+        ]);
+
+        $ressource = Ressources::create([
+            'type'           => 'url',
+            'url'            => $validated['url'],
+            'nom_original'   => $validated['nom_original'] ?? null,
+            'id_utilisateur' => Auth::id(),
+        ]);
+
+        return response()->json($ressource, 201);
     }
 
     public function storeFromRss(Request $request): JsonResponse
     {
-        // TODO: sauvegarder un article RSS
-        return response()->json(['message' => 'article RSS sauvegardé'], 201);
+        $validated = $request->validate([
+            'url'          => 'required|url|max:2048',
+            'nom_original' => 'nullable|string|max:150',
+            'id_fluxrss'   => 'required|integer|exists:flux_rss,id_fluxrss',
+        ]);
+
+        $ressource = Ressources::create([
+            'type'           => 'rss',
+            'url'            => $validated['url'],
+            'nom_original'   => $validated['nom_original'] ?? null,
+            'id_utilisateur' => Auth::id(),
+            'id_fluxrss'     => $validated['id_fluxrss'],
+        ]);
+
+        return response()->json($ressource, 201);
+    }
+
+    public function storeFromFile(Request $request): JsonResponse
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:txt,md,pdf|max:5120',
+        ]);
+
+        $file = $request->file('file');
+        $path = $file->store('ressources');
+
+        $ressource = Ressources::create([
+            'type'          => 'file',
+            'url'           => $path,
+            'nom_original'  => $file->getClientOriginalName(),
+            'id_utilisateur' => Auth::id(),
+        ]);
+
+        return response()->json($ressource, 201);
+    }
+
+    public function storeFromYoutube(Request $request): JsonResponse
+    {
+        $request->validate([
+            'url'          => ['required', 'url', 'regex:/(youtube\.com|youtu\.be)/'],
+            'nom_original' => 'nullable|string|max:150',
+        ]);
+
+        $ressource = Ressources::create([
+            'type'           => 'youtube',
+            'url'            => $request->input('url'),
+            'nom_original'   => $request->input('nom_original'),
+            'id_utilisateur' => Auth::id(),
+        ]);
+
+        return response()->json($ressource, 201);
     }
 
     public function show(int $id): JsonResponse
@@ -37,16 +94,17 @@ class RessourceController extends Controller
         return response()->json($ressource);
     }
 
-    public function edit(int $id): JsonResponse
-    {
-        $ressource = Ressources::findOrFail($id);
-        return response()->json($ressource);
-    }
-
     public function update(Request $request, int $id): JsonResponse
     {
         $ressource = Ressources::findOrFail($id);
-        // TODO: valider et mettre à jour
+
+        $validated = $request->validate([
+            'nom_original' => 'sometimes|nullable|string|max:150',
+            'resume'       => 'sometimes|nullable|string',
+        ]);
+
+        $ressource->update($validated);
+
         return response()->json($ressource);
     }
 
@@ -67,5 +125,20 @@ class RessourceController extends Controller
     {
         Ressources::findOrFail($id)->tags()->detach($tagId);
         return response()->json(null, 204);
+    }
+
+    public function generateResume(int $id): JsonResponse
+    {
+        $ressource = Ressources::findOrFail($id);
+
+        if ($ressource->id_utilisateur !== Auth::id()) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
+        $resume = (new ResumeService())->generate($ressource);
+
+        $ressource->update(['resume' => $resume]);
+
+        return response()->json(['resume' => $resume]);
     }
 }

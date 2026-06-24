@@ -12,7 +12,7 @@ class FluxRss extends Model
     protected $table = 'flux_rss';
     protected $primaryKey = 'id_fluxrss';
 
-    protected $fillable = ['url', 'id_utilisateur'];
+    protected $fillable = ['url', 'name', 'id_utilisateur'];
 
     public function utilisateur(): BelongsTo
     {
