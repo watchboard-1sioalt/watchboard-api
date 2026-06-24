@@ -558,9 +558,16 @@ class ComposerStaticInit36793882908b6cbdd344b5a4840231db
     );
 
     public static $classMap = array (
+        'App\\Http\\Controllers\\AuthController' => __DIR__ . '/../..' . '/app/Http/Controllers/AuthController.php',
         'App\\Http\\Controllers\\Controller' => __DIR__ . '/../..' . '/app/Http/Controllers/Controller.php',
+        'App\\Http\\Controllers\\UserController' => __DIR__ . '/../..' . '/app/Http/Controllers/UserController.php',
+        'App\\Models\\FluxRss' => __DIR__ . '/../..' . '/app/Models/FluxRss.php',
+        'App\\Models\\Parametres' => __DIR__ . '/../..' . '/app/Models/Parametres.php',
+        'App\\Models\\Ressources' => __DIR__ . '/../..' . '/app/Models/Ressources.php',
+        'App\\Models\\Syntheses' => __DIR__ . '/../..' . '/app/Models/Syntheses.php',
         'App\\Models\\User' => __DIR__ . '/../..' . '/app/Models/User.php',
-        'App\\Models\\Utilisateur' => __DIR__ . '/../..' . '/app/Models/Utilisateur.php',
+        'App\\Models\\UserParams' => __DIR__ . '/../..' . '/app/Models/UserParams.php',
+        'App\\Models\\Utilisateurs' => __DIR__ . '/../..' . '/app/Models/Utilisateurs.php',
         'App\\Providers\\AppServiceProvider' => __DIR__ . '/../..' . '/app/Providers/AppServiceProvider.php',
         'Attribute' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Attribute.php',
         'Brick\\Math\\BigDecimal' => __DIR__ . '/..' . '/brick/math/src/BigDecimal.php',

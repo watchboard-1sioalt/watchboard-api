@@ -1,5 +1,15 @@
 <?php
 
+namespace App\Models;
+
+use App\Models\Ressources;
+use App\Models\Utilisateurs;
+use App\Models\Tags;
+
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+
 class FluxRss extends Model
 {
     protected $table = 'flux_rss';
@@ -9,13 +19,13 @@ class FluxRss extends Model
 
     public function utilisateur(): BelongsTo
     {
-        return $this->belongsTo(Utilisateur::class, 'id_utilisateur');
+        return $this->belongsTo(Utilisateurs::class, 'id_utilisateur');
     }
 
     public function ressources(): BelongsToMany
     {
         return $this->belongsToMany(
-            Ressource::class,
+            Ressources::class,
             'associer',
             'id_fluxrss',
             'id_ressource'
@@ -25,7 +35,7 @@ class FluxRss extends Model
     public function tags(): BelongsToMany
     {
         return $this->belongsToMany(
-            Tag::class,
+            Tags::class,
             'appartenir',
             'id_fluxrss',
             'id_tag'
