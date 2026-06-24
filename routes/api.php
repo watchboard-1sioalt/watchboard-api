@@ -32,11 +32,9 @@ Route::prefix('tags')->controller(TagsController::class)->group(function () {
 
 Route::middleware('auth:api')->prefix('ressources')->controller(RessourceController::class)->group(function () {
     Route::get('/', 'index');
-    Route::get('/creer', 'create');
     Route::post('/creer', 'store');
     Route::post('/depuis-rss', 'storeFromRss');
     Route::get('/{id}', 'show');
-    Route::get('/{id}/modifier', 'edit');
     Route::post('/{id}/modifier', 'update');
     Route::post('/{id}/supprimer', 'destroy');
     Route::post('/{id}/tags', 'attachTag');
