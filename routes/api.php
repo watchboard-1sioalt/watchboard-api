@@ -21,6 +21,7 @@ Route::prefix('tags')->controller(TagsController::class)->group(function () {
     Route::get('public', 'public');
 
     Route::middleware('auth:api')->group(function () {
+        Route::get('autocomplete', 'autocomplete');
         Route::get('list', 'listUserTags');
         Route::post('create', 'create');
         Route::patch('edit', 'edit');
