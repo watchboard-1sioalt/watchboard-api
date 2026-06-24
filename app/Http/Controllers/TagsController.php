@@ -91,6 +91,22 @@ class TagsController extends Controller
     }
 
     
+    public function autocomplete(Request $request)
+    {
+        $user = $this->authUser();
+        $q = $request->query('q', '');
+
+        $tags = Tags::where(function ($query) use ($user) {
+                    $query->where('public', true)
+                          ->orWhere('id_utilisateur', $user->id_utilisateur);
+                })
+                ->where('tag', 'like', "%{$q}%")
+                ->limit(10)
+                ->get(['id_tag', 'tag', 'public']);
+
+        return response()->json($tags);
+    }
+
     // gestion des tags publics par les admin
     public function createPublic(Request $request)
     {
