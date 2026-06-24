@@ -14,7 +14,6 @@ class TagsController extends Controller
     }
 
     // Tags publics
-
     public function public(Request $request)
     {
         return Tags::where('public', true)->get();
