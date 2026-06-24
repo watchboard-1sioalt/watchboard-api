@@ -2,10 +2,7 @@
 
 namespace App\Models;
 
-use App\Models\Ressources;
-use App\Models\Utilisateurs;
-use App\Models\Tags;
-
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -22,14 +19,9 @@ class FluxRss extends Model
         return $this->belongsTo(Utilisateurs::class, 'id_utilisateur');
     }
 
-    public function ressources(): BelongsToMany
+    public function ressources(): HasMany
     {
-        return $this->belongsToMany(
-            Ressources::class,
-            'associer',
-            'id_fluxrss',
-            'id_ressource'
-        );
+        return $this->hasMany(Ressources::class, 'id_fluxrss');
     }
 
     public function tags(): BelongsToMany

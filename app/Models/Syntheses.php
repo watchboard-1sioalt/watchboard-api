@@ -2,27 +2,29 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-
-use App\Models\Ressources;
-use App\Models\Utilisateurs;
 
 class Syntheses extends Model
 {
     protected $table = 'syntheses';
     protected $primaryKey = 'id_synthese';
 
-    protected $fillable = ['synthese', 'id_utilisateur'];
+    protected $fillable = ['synthese', 'date_creation', 'id_utilisateur'];
 
     public function utilisateur(): BelongsTo
     {
         return $this->belongsTo(Utilisateurs::class, 'id_utilisateur');
     }
 
-    public function ressources(): HasMany
+    public function ressources(): BelongsToMany
     {
-        return $this->hasMany(Ressources::class, 'id_synthese');
+        return $this->belongsToMany(
+            Ressources::class,
+            'synthetiser',
+            'id_synthese',
+            'id_ressource'
+        );
     }
 }

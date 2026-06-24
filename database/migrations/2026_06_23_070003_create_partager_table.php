@@ -8,17 +8,15 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('syntheses', function (Blueprint $table) {
-            $table->id('id_synthese');
-            $table->text('synthese')->nullable();
-            $table->dateTime('date_creation');
+        Schema::create('partager', function (Blueprint $table) {
             $table->unsignedBigInteger('id_utilisateur');
-            $table->timestamps();
+            $table->unsignedBigInteger('id_ressource');
+            $table->primary(['id_utilisateur', 'id_ressource']);
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('syntheses');
+        Schema::dropIfExists('partager');
     }
 };

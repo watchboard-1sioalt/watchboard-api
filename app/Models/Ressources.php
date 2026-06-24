@@ -1,13 +1,10 @@
 <?php
+
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-
-use App\Models\Syntheses;
-use App\Models\Utilisateurs;
-use App\Models\Tags;
-
 
 class Ressources extends Model
 {
@@ -16,36 +13,46 @@ class Ressources extends Model
 
     protected $fillable = [
         'type', 'resume', 'url',
-        'nom_original', 'id_synthese', 'id_utilisateur',
+        'nom_original', 'id_utilisateur', 'id_fluxrss',
     ];
-
-    public function synthese(): BelongsTo
-    {
-        return $this->belongsTo(Syntheses::class, 'id_synthese');
-    }
 
     public function utilisateur(): BelongsTo
     {
         return $this->belongsTo(Utilisateurs::class, 'id_utilisateur');
     }
 
+    public function fluxRss(): BelongsTo
+    {
+        return $this->belongsTo(FluxRss::class, 'id_fluxrss');
+    }
+
     public function tags(): BelongsToMany
     {
         return $this->belongsToMany(
             Tags::class,
-            'catégoriser',        // table pivot
+            'catégoriser',
             'id_ressource',
             'id_tag'
         );
     }
 
-    public function fluxRss(): BelongsToMany
+    public function syntheses(): BelongsToMany
     {
         return $this->belongsToMany(
-            FluxRss::class,
-            'associer',
+            Syntheses::class,
+            'synthetiser',
             'id_ressource',
-            'id_fluxrss'
+            'id_synthese'
+        );
+    }
+
+    public function partages(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Utilisateurs::class,
+            'partager',
+            'id_ressource',
+            'id_utilisateur'
         );
     }
 }
