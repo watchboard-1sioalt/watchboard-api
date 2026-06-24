@@ -6,22 +6,18 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::create('user_params', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
+        Schema::create('userParams', function (Blueprint $table) {
+            $table->unsignedBigInteger('id_utilisateur');
+            $table->unsignedBigInteger('id_parametre');
+            $table->string('paramValue', 255)->nullable();
+            $table->primary(['id_utilisateur', 'id_parametre']);
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('user_params');
+        Schema::dropIfExists('userParams');
     }
 };

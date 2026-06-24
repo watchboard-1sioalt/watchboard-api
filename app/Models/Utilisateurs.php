@@ -3,27 +3,17 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Models\Ressource;
-use App\Models\Parametres;
-use App\Models\Synthese;
-use App\Models\FluxRss;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
-
-use Database\Factories\UserFactory;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
 use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 
-#[Fillable(['nom', 'prenom', 'email', 'password'])]
-#[Hidden(['password', 'remember_token'])]
-
 class Utilisateurs extends Authenticatable implements JWTSubject
 {
-    /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
+
     protected $table = 'utilisateurs';
     protected $primaryKey = 'id_utilisateur';
 
@@ -34,19 +24,9 @@ class Utilisateurs extends Authenticatable implements JWTSubject
 
     protected $hidden = ['password'];
 
-    public function parametres(): HasMany
+    public function tags(): HasMany
     {
-        return $this->hasMany(Parametres::class, 'id_utilisateur');
-    }
-
-    public function syntheses(): HasMany
-    {
-        return $this->hasMany(Synthese::class, 'id_utilisateur');
-    }
-
-    public function ressources(): HasMany
-    {
-        return $this->hasMany(Ressource::class, 'id_utilisateur');
+        return $this->hasMany(Tags::class, 'id_utilisateur');
     }
 
     public function fluxRss(): HasMany
@@ -54,41 +34,54 @@ class Utilisateurs extends Authenticatable implements JWTSubject
         return $this->hasMany(FluxRss::class, 'id_utilisateur');
     }
 
+    public function syntheses(): HasMany
+    {
+        return $this->hasMany(Syntheses::class, 'id_utilisateur');
+    }
 
+    public function ressources(): HasMany
+    {
+        return $this->hasMany(Ressources::class, 'id_utilisateur');
+    }
 
+    public function ressourcesPartagees(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Ressources::class,
+            'partager',
+            'id_utilisateur',
+            'id_ressource'
+        );
+    }
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
+    public function parametres(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Parametres::class,
+            'userParams',
+            'id_utilisateur',
+            'id_parametre'
+        )->withPivot('value_');
+    }
+
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'validation' => 'boolean',
+            'admin' => 'boolean',
         ];
     }
 
-    /**
-     * Get the identifier that will be stored in the subject claim of the JWT.
-     *
-     * @return mixed
-     */
     public function getJWTIdentifier()
     {
         return $this->getKey();
     }
 
-    /**
-     * Return a key-value array, containing any custom claims to be added to the JWT.
-     *
-     * @return array
-     */
     public function getJWTCustomClaims()
     {
         return [
-            'admin' => $this->admin
-            ];
+            'admin' => $this->admin,
+        ];
     }
 }

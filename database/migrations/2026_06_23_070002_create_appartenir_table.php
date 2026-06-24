@@ -8,15 +8,15 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('parametres', function (Blueprint $table) {
-            $table->id('id_parametre');
-            $table->string('name', 50)->nullable();
-            $table->timestamps();
+        Schema::create('appartenir', function (Blueprint $table) {
+            $table->unsignedBigInteger('id_tag');
+            $table->unsignedBigInteger('id_fluxrss');
+            $table->primary(['id_tag', 'id_fluxrss']);
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('parametres');
+        Schema::dropIfExists('appartenir');
     }
 };

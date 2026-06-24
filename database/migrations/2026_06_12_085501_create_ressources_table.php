@@ -6,20 +6,20 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('ressources', function (Blueprint $table) {
-            $table->id();
+            $table->id('id_ressource');
+            $table->string('type', 50);
+            $table->text('resume')->nullable();
+            $table->string('url', 255);
+            $table->string('nom_original', 150)->nullable();
+            $table->unsignedBigInteger('id_utilisateur');
+            $table->unsignedBigInteger('id_fluxrss')->nullable();
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('ressources');

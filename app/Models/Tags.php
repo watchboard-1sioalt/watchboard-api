@@ -2,19 +2,21 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-
-use App\Models\Ressources;
-use App\Models\FluxRss;
 
 class Tags extends Model
 {
     protected $table = 'tags';
     protected $primaryKey = 'id_tag';
 
-    protected $fillable = ['tag', 'public'];
+    protected $fillable = ['tag', 'public', 'id_utilisateur'];
+
+    public function utilisateur(): BelongsTo
+    {
+        return $this->belongsTo(Utilisateurs::class, 'id_utilisateur');
+    }
 
     public function ressources(): BelongsToMany
     {
