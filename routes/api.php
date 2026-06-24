@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\FeedController;
 use App\Http\Controllers\RessourceController;
 use App\Http\Controllers\TagsController;
 use Illuminate\Support\Facades\Route;
@@ -29,6 +30,14 @@ Route::prefix('tags')->controller(TagsController::class)->group(function () {
         Route::patch('editPublic', 'editPublic');
         Route::delete('deletepublic', 'deletePublic');
     });
+});
+
+Route::middleware('auth:api')->prefix('feeds')->controller(FeedController::class)->group(function () {
+    Route::get('/', 'index');
+    Route::post('/', 'store');
+    Route::get('/{id}', 'show');
+    Route::put('/{id}', 'update');
+    Route::delete('/{id}', 'destroy');
 });
 
 Route::middleware('auth:api')->prefix('ressources')->controller(RessourceController::class)->group(function () {
