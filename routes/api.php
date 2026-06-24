@@ -1,8 +1,9 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\RessourceController;
 use App\Http\Controllers\TagsController;
+use Illuminate\Support\Facades\Route;
 
 Route::prefix('auth')->controller(AuthController::class)->group(function () {
     Route::post('register', 'register');
@@ -17,7 +18,7 @@ Route::prefix('auth')->controller(AuthController::class)->group(function () {
 
 Route::prefix('tags')->controller(TagsController::class)->group(function () {
     Route::get('public', 'public');
-    
+
     Route::middleware('auth:api')->group(function () {
         Route::get('list', 'listUserTags');
         Route::post('create', 'create');
@@ -28,4 +29,17 @@ Route::prefix('tags')->controller(TagsController::class)->group(function () {
         Route::patch('editPublic', 'editPublic');
         Route::delete('deletepublic', 'deletePublic');
     });
+});
+
+Route::middleware('auth:api')->prefix('ressources')->controller(RessourceController::class)->group(function () {
+    Route::get('/', 'index');
+    Route::get('/creer', 'create');
+    Route::post('/creer', 'store');
+    Route::post('/depuis-rss', 'storeFromRss');
+    Route::get('/{id}', 'show');
+    Route::get('/{id}/modifier', 'edit');
+    Route::post('/{id}/modifier', 'update');
+    Route::post('/{id}/supprimer', 'destroy');
+    Route::post('/{id}/tags', 'attachTag');
+    Route::delete('/{id}/tags/{tagId}', 'detachTag');
 });
