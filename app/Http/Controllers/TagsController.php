@@ -13,14 +13,13 @@ class TagsController extends Controller
         return JWTAuth::parseToken()->authenticate();
     }
 
-    // ── Public tags (read-only, no auth) ──────────────────────────────────
+    // Tags publics
 
     public function public(Request $request)
     {
         return Tags::where('public', true)->get();
     }
 
-    // ── Personal tags (auth required) ────────────────────────────────────
 
     public function listUserTags(Request $request)
     {
@@ -91,8 +90,8 @@ class TagsController extends Controller
         return response()->json(['ok' => true, 'message' => 'Tag supprimé avec succès!'], 200);
     }
 
-    // ── Public tags management (admin only) ───────────────────────────────
-
+    
+    // gestion des tags publics par les admin
     public function createPublic(Request $request)
     {
         $user = $this->authUser();
