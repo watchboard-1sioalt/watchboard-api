@@ -22,7 +22,7 @@ class RessourceController extends Controller
             'url'          => 'required|url|max:2048',
             'nom_original' => 'nullable|string|max:150',
             'image'        => 'nullable|url|max:2048',
-            'description'  => 'nullable|string',
+            'resume'       => 'nullable|string',
         ]);
 
         $ressource = Ressources::create([
@@ -30,7 +30,7 @@ class RessourceController extends Controller
             'url'            => $validated['url'],
             'nom_original'   => $validated['nom_original'] ?? null,
             'image'          => $validated['image'] ?? null,
-            'description'    => $validated['description'] ?? null,
+            'resume'         => $validated['resume'] ?? null,
             'id_utilisateur' => Auth::id(),
         ]);
 
@@ -44,7 +44,7 @@ class RessourceController extends Controller
             'nom_original' => 'nullable|string|max:150',
             'id_fluxrss'   => 'required|integer|exists:flux_rss,id_fluxrss',
             'image'        => 'nullable|url|max:2048',
-            'description'  => 'nullable|string',
+            'resume'       => 'nullable|string',
         ]);
 
         $ressource = Ressources::create([
@@ -52,7 +52,7 @@ class RessourceController extends Controller
             'url'            => $validated['url'],
             'nom_original'   => $validated['nom_original'] ?? null,
             'image'          => $validated['image'] ?? null,
-            'description'    => $validated['description'] ?? null,
+            'resume'         => $validated['resume'] ?? null,
             'id_utilisateur' => Auth::id(),
             'id_fluxrss'     => $validated['id_fluxrss'],
         ]);

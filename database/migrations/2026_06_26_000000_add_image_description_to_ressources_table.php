@@ -10,14 +10,13 @@ return new class extends Migration
     {
         Schema::table('ressources', function (Blueprint $table) {
             $table->string('image', 2048)->nullable()->after('url');
-            $table->text('description')->nullable()->after('image');
         });
     }
 
     public function down(): void
     {
         Schema::table('ressources', function (Blueprint $table) {
-            $table->dropColumn(['image', 'description']);
+            $table->dropColumn('image');
         });
     }
 };
