@@ -62,10 +62,14 @@ Route::middleware('auth:api')->prefix('ressources')->controller(RessourceControl
     Route::post('/from-rss', 'storeFromRss');
     Route::post('/from-file', 'storeFromFile');
     Route::post('/from-youtube', 'storeFromYoutube');
+    Route::get('/shared-with-me', 'sharedWithMe');
     Route::get('/{id}', 'show');
     Route::post('/{id}/update', 'update');
     Route::post('/{id}/delete', 'destroy');
     Route::post('/{id}/tags', 'attachTag');
     Route::delete('/{id}/tags/{tagId}', 'detachTag');
     Route::post('/{id}/resume/generate', 'generateResume');
+    Route::post('/{id}/share', 'share');
+    Route::delete('/{id}/share', 'ignoreShare');
+    Route::post('/{id}/share/duplicate', 'duplicateShare');
 });
