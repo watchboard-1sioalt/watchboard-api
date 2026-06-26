@@ -4,6 +4,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FeedController;
 use App\Http\Controllers\RessourceController;
+use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\TagsController;
 use Illuminate\Support\Facades\Route;
 
