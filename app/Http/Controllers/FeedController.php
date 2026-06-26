@@ -12,7 +12,7 @@ class FeedController extends Controller
 {
     public function index(): JsonResponse
     {
-        $feeds = FluxRss::where('id_utilisateur', Auth::id())->get();
+        $feeds = FluxRss::with('tags')->where('id_utilisateur', Auth::id())->get();
 
         return response()->json($feeds);
     }
@@ -37,7 +37,7 @@ class FeedController extends Controller
 
     public function show(int $id): JsonResponse
     {
-        $feed = FluxRss::where('id_fluxrss', $id)
+        $feed = FluxRss::with('tags')->where('id_fluxrss', $id)
             ->where('id_utilisateur', Auth::id())
             ->firstOrFail();
 
