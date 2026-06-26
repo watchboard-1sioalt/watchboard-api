@@ -15,6 +15,7 @@ Route::prefix('auth')->controller(AuthController::class)->group(function () {
     Route::middleware('auth:api')->group(function () {
         Route::get('me', 'me');
         Route::put('me', 'updateMe');
+        Route::put('password', 'updatePassword');
         Route::post('refresh', 'refresh');
         Route::post('logout', 'logout');
     });
