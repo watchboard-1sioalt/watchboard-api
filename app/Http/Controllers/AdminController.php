@@ -17,4 +17,13 @@ class AdminController extends Controller {
 
         return response()->json($utilisateurs);
     }
+
+    public function user($id)
+    {
+        $utilisateur = Utilisateurs::select(
+            'id_utilisateur', 'nom', 'prenom', 'email', 'admin', 'validation'
+        )->findOrFail($id);
+
+        return response()->json($utilisateur);
+    }
 }

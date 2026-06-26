@@ -48,6 +48,7 @@ Route::middleware('auth:api')->prefix('feeds')->controller(FeedController::class
 
 Route::middleware('auth:api')->prefix('admin')->controller(AdminController::class)->group(function () {
     Route::get('users', 'users');
+    Route::get('users/{id}', 'user');
 });
 
 Route::middleware('auth:api')->prefix('ressources')->controller(RessourceController::class)->group(function () {
