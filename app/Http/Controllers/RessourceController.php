@@ -12,7 +12,7 @@ class RessourceController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $ressources = Ressources::all();
+        $ressources = Ressources::with('tags')->get();
         return response()->json($ressources);
     }
 
@@ -90,7 +90,7 @@ class RessourceController extends Controller
 
     public function show(int $id): JsonResponse
     {
-        $ressource = Ressources::findOrFail($id);
+        $ressource = Ressources::with('tags')->findOrFail($id);
         return response()->json($ressource);
     }
 
