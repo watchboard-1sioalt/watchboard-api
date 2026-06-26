@@ -26,4 +26,15 @@ class AdminController extends Controller {
 
         return response()->json($utilisateur);
     }
+
+    public function validate($id)
+    {
+        $utilisateur = Utilisateurs::findOrFail($id);
+        $utilisateur->validation = true;
+        $utilisateur->save();
+
+        return response()->json($utilisateur->only(
+            'id_utilisateur', 'nom', 'prenom', 'email', 'admin', 'validation'
+        ));
+    }
 }
