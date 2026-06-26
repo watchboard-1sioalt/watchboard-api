@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Utilisateurs;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
@@ -55,6 +56,24 @@ class AuthController extends Controller
         $user->update($data);
 
         return response()->json($user->fresh());
+    }
+
+    public function updatePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => 'required|string',
+            'new_password'     => 'required|string|min:8|confirmed',
+        ]);
+
+        $user = JWTAuth::user();
+
+        if (! Hash::check($request->current_password, $user->password)) {
+            return response()->json(['message' => 'Mot de passe actuel incorrect'], 422);
+        }
+
+        $user->update(['password' => $request->new_password]);
+
+        return response()->json(['message' => 'Mot de passe mis à jour']);
     }
 
     public function refresh()
