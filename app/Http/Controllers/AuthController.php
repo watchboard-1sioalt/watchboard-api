@@ -42,6 +42,21 @@ class AuthController extends Controller
         return response()->json(JWTAuth::user());
     }
 
+    public function updateMe(Request $request)
+    {
+        $user = JWTAuth::user();
+
+        $data = $request->validate([
+            'nom'    => 'sometimes|string|max:255',
+            'prenom' => 'sometimes|string|max:255',
+            'email'  => 'sometimes|email|max:255|unique:utilisateurs,email,' . $user->id,
+        ]);
+
+        $user->update($data);
+
+        return response()->json($user->fresh());
+    }
+
     public function refresh()
     {
         return $this->respondWithToken(JWTAuth::refresh());
