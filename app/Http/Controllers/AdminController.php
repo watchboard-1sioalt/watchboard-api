@@ -37,4 +37,15 @@ class AdminController extends Controller {
             'id_utilisateur', 'nom', 'prenom', 'email', 'admin', 'validation'
         ));
     }
+
+    public function disable($id)
+    {
+        $utilisateur = Utilisateurs::findOrFail($id);
+        $utilisateur->validation = false;
+        $utilisateur->save();
+
+        return response()->json($utilisateur->only(
+            'id_utilisateur', 'nom', 'prenom', 'email', 'admin', 'validation'
+        ));
+    }
 }
