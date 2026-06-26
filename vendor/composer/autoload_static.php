@@ -579,6 +579,7 @@ class ComposerStaticInit36793882908b6cbdd344b5a4840231db
     public static $classMap = array (
         'App\\Http\\Controllers\\AuthController' => __DIR__ . '/../..' . '/app/Http/Controllers/AuthController.php',
         'App\\Http\\Controllers\\Controller' => __DIR__ . '/../..' . '/app/Http/Controllers/Controller.php',
+        'App\\Http\\Controllers\\FeedController' => __DIR__ . '/../..' . '/app/Http/Controllers/FeedController.php',
         'App\\Http\\Controllers\\RessourceController' => __DIR__ . '/../..' . '/app/Http/Controllers/RessourceController.php',
         'App\\Http\\Controllers\\TagsController' => __DIR__ . '/../..' . '/app/Http/Controllers/TagsController.php',
         'App\\Http\\Controllers\\UserController' => __DIR__ . '/../..' . '/app/Http/Controllers/UserController.php',
@@ -590,6 +591,7 @@ class ComposerStaticInit36793882908b6cbdd344b5a4840231db
         'App\\Models\\UserParams' => __DIR__ . '/../..' . '/app/Models/UserParams.php',
         'App\\Models\\Utilisateurs' => __DIR__ . '/../..' . '/app/Models/Utilisateurs.php',
         'App\\Providers\\AppServiceProvider' => __DIR__ . '/../..' . '/app/Providers/AppServiceProvider.php',
+        'App\\Services\\ResumeService' => __DIR__ . '/../..' . '/app/Services/ResumeService.php',
         'Attribute' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Attribute.php',
         'Brick\\Math\\BigDecimal' => __DIR__ . '/..' . '/brick/math/src/BigDecimal.php',
         'Brick\\Math\\BigInteger' => __DIR__ . '/..' . '/brick/math/src/BigInteger.php',
