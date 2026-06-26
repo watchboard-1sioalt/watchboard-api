@@ -144,12 +144,21 @@ class FeedController extends Controller
         $meta = ['feed_id' => $feed->id_fluxrss, 'feed_name' => $feed->name ?? $feed->url];
 
         if (isset($xml->channel->item)) {
+            $logo = isset($xml->channel->image->url)
+                ? (string) $xml->channel->image->url
+                : null;
+
             foreach ($xml->channel->item as $item) {
+                $enclosure = $item->enclosure ?? null;
+                $image = ($enclosure && isset($enclosure['url'])) ? (string) $enclosure['url'] : null;
+
                 $articles[] = $meta + [
                     'title'        => (string) $item->title,
                     'url'          => (string) $item->link,
                     'description'  => strip_tags((string) $item->description),
                     'published_at' => (string) $item->pubDate,
+                    'image'        => $image,
+                    'feed_logo'    => $logo,
                 ];
             }
         } elseif (isset($xml->entry)) {
@@ -166,6 +175,8 @@ class FeedController extends Controller
                     'url'          => $link,
                     'description'  => strip_tags((string) ($entry->summary ?? $entry->content ?? '')),
                     'published_at' => (string) $entry->updated,
+                    'image'        => null,
+                    'feed_logo'    => null,
                 ];
             }
         }
