@@ -15,15 +15,32 @@ class ResumeService
             $prompt = "Tu es un assistant de veille informationnelle. "
                 . "Génère un résumé concis (3 à 5 phrases) de ce document en français.\n\n"
                 . $content;
+        } elseif ($ressource->type === 'youtube') {
+            $transcript = (new YoutubeTranscriptService())->fetch($ressource->url);
+
+            if (!$transcript) {
+                throw new \RuntimeException('Aucune transcription disponible pour cette vidéo YouTube.');
+            }
+
+            $header = $ressource->nom_original
+                ? "Titre : {$ressource->nom_original}\n\n"
+                : '';
+            $prompt = "Tu es un assistant de veille informationnelle. "
+                . "Génère un résumé concis (3 à 5 phrases) de cette vidéo YouTube en français, "
+                . "en te basant sur sa transcription.\n\n"
+                . $header
+                . "Transcription :\n"
+                . $transcript;
         } else {
             $context = "Titre : {$ressource->nom_original}\nURL : {$ressource->url}";
             $prompt = "Tu es un assistant de veille informationnelle. "
-                . "Génère un résumé concis (3 à 5 phrases) de cette vidéo YouTube en français.\n\n"
+                . "Génère un résumé concis (3 à 5 phrases) de cette ressource en français.\n\n"
                 . $context;
         }
 
-        $result = Gemini::generativeModel('models/gemini-2.5-flash-lite')->generateContent($prompt);
-
-        return $result->text();
+        return retry(3, function () use ($prompt) {
+            $result = Gemini::generativeModel('models/gemini-2.5-flash-lite')->generateContent($prompt);
+            return $result->text();
+        }, sleepMilliseconds: 2000);
     }
 }

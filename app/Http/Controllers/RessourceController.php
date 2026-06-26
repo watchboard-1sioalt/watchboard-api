@@ -135,7 +135,11 @@ class RessourceController extends Controller
             return response()->json(['message' => 'Forbidden'], 403);
         }
 
-        $resume = (new ResumeService())->generate($ressource);
+        try {
+            $resume = (new ResumeService())->generate($ressource);
+        } catch (\Throwable) {
+            return response()->json(['message' => 'Le service de résumé est temporairement indisponible. Veuillez réessayer dans quelques instants.'], 503);
+        }
 
         $ressource->update(['resume' => $resume]);
 
