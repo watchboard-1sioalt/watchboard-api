@@ -3,11 +3,7 @@
         'name' => 'laravel/laravel',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-<<<<<<< HEAD
-        'reference' => '791e0ce077acc35c9564d2704507009c15ea859c',
-=======
-        'reference' => 'f6d59c5cfac8c3839c7f12f6806f32102257868b',
->>>>>>> a3190e0efb6e632b44695fed1c28e27c23348336
+        'reference' => 'e605be23b448bae48749d34a58437b5a85c970ee',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -431,11 +427,7 @@
         'laravel/laravel' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-<<<<<<< HEAD
-            'reference' => '791e0ce077acc35c9564d2704507009c15ea859c',
-=======
-            'reference' => 'f6d59c5cfac8c3839c7f12f6806f32102257868b',
->>>>>>> a3190e0efb6e632b44695fed1c28e27c23348336
+            'reference' => 'e605be23b448bae48749d34a58437b5a85c970ee',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -469,9 +461,9 @@
             'dev_requirement' => true,
         ),
         'laravel/prompts' => array(
-            'pretty_version' => 'v0.3.18',
-            'version' => '0.3.18.0',
-            'reference' => 'a19af51bb144bf87f08397921fa619f85c7d4e72',
+            'pretty_version' => 'v0.3.21',
+            'version' => '0.3.21.0',
+            'reference' => '7753c65c281c2550c7c183f14e18062073b7d821',
             'type' => 'library',
             'install_path' => __DIR__ . '/../laravel/prompts',
             'aliases' => array(),
@@ -532,9 +524,9 @@
             'dev_requirement' => false,
         ),
         'league/flysystem' => array(
-            'pretty_version' => '3.35.0',
-            'version' => '3.35.0.0',
-            'reference' => 'd0a405f03d980461e4b6e08cfed2c162650f9f6b',
+            'pretty_version' => '3.35.1',
+            'version' => '3.35.1.0',
+            'reference' => 'f23af6c5aafd958a7593029a271d77baf5ed793c',
             'type' => 'library',
             'install_path' => __DIR__ . '/../league/flysystem',
             'aliases' => array(),
