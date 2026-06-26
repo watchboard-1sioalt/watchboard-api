@@ -12,7 +12,7 @@ class Ressources extends Model
     protected $primaryKey = 'id_ressource';
 
     protected $fillable = [
-        'type', 'resume', 'url',
+        'type', 'resume', 'url', 'image', 'description',
         'nom_original', 'id_utilisateur', 'id_fluxrss',
     ];
 
