@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FeedController;
 use App\Http\Controllers\RessourceController;
@@ -43,6 +44,10 @@ Route::middleware('auth:api')->prefix('feeds')->controller(FeedController::class
     Route::get('/{id}/articles', 'articles');
     Route::post('/{id}/tags', 'attachTag');
     Route::delete('/{id}/tags/{tagId}', 'detachTag');
+});
+
+Route::middleware('auth:api')->prefix('admin')->controller(AdminController::class)->group(function () {
+    Route::get('users', 'users');
 });
 
 Route::middleware('auth:api')->prefix('ressources')->controller(RessourceController::class)->group(function () {
