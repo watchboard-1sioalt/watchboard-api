@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('userParams', function (Blueprint $table) {
             $table->unsignedBigInteger('id_utilisateur');
             $table->unsignedBigInteger('id_parametre');
-            $table->string('paramValue', 255)->nullable();
+            $table->string('value_', 255)->nullable();
             $table->primary(['id_utilisateur', 'id_parametre']);
         });
     }
