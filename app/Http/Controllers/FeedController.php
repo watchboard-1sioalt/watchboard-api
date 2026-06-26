@@ -65,18 +65,119 @@ class FeedController extends Controller
             ->where('id_utilisateur', Auth::id())
             ->firstOrFail();
 
-        // Detach tags without deleting saved resources
         $feed->tags()->detach();
         $feed->delete();
 
         return response()->json(null, 204);
     }
 
+    public function articles(int $id): JsonResponse
+    {
+        $feed = FluxRss::where('id_fluxrss', $id)
+            ->where('id_utilisateur', Auth::id())
+            ->firstOrFail();
+
+        return response()->json($this->parseFeedArticles($feed));
+    }
+
+    public function allArticles(Request $request): JsonResponse
+    {
+        $query = FluxRss::where('id_utilisateur', Auth::id());
+
+        if ($request->filled('flux_id')) {
+            $query->where('id_fluxrss', $request->integer('flux_id'));
+        }
+
+        if ($request->filled('tag')) {
+            $query->whereHas('tags', fn ($q) => $q->where('tag', $request->string('tag')));
+        }
+
+        $articles = [];
+        foreach ($query->get() as $feed) {
+            $articles = array_merge($articles, $this->parseFeedArticles($feed));
+        }
+
+        usort($articles, fn ($a, $b) => strcmp($b['published_at'] ?? '', $a['published_at'] ?? ''));
+
+        return response()->json($articles);
+    }
+
+    public function attachTag(Request $request, int $id): JsonResponse
+    {
+        $feed = FluxRss::where('id_fluxrss', $id)
+            ->where('id_utilisateur', Auth::id())
+            ->firstOrFail();
+
+        $validated = $request->validate(['tag_id' => 'required|integer|exists:tags,id_tag']);
+
+        $feed->tags()->syncWithoutDetaching([$validated['tag_id']]);
+
+        return response()->json(null, 204);
+    }
+
+    public function detachTag(int $id, int $tagId): JsonResponse
+    {
+        $feed = FluxRss::where('id_fluxrss', $id)
+            ->where('id_utilisateur', Auth::id())
+            ->firstOrFail();
+
+        $feed->tags()->detach($tagId);
+
+        return response()->json(null, 204);
+    }
+
+    private function parseFeedArticles(FluxRss $feed): array
+    {
+        $response = Http::timeout(10)->get($feed->url);
+
+        if (! $response->successful()) {
+            return [];
+        }
+
+        $xml = @simplexml_load_string($response->body(), 'SimpleXMLElement', LIBXML_NOCDATA);
+
+        if ($xml === false) {
+            return [];
+        }
+
+        $articles = [];
+        $meta = ['feed_id' => $feed->id_fluxrss, 'feed_name' => $feed->name ?? $feed->url];
+
+        if (isset($xml->channel->item)) {
+            foreach ($xml->channel->item as $item) {
+                $articles[] = $meta + [
+                    'title'        => (string) $item->title,
+                    'url'          => (string) $item->link,
+                    'description'  => strip_tags((string) $item->description),
+                    'published_at' => (string) $item->pubDate,
+                ];
+            }
+        } elseif (isset($xml->entry)) {
+            foreach ($xml->entry as $entry) {
+                $link = '';
+                foreach ($entry->link as $l) {
+                    if (in_array((string) $l['rel'], ['alternate', ''])) {
+                        $link = (string) $l['href'];
+                        break;
+                    }
+                }
+                $articles[] = $meta + [
+                    'title'        => (string) $entry->title,
+                    'url'          => $link,
+                    'description'  => strip_tags((string) ($entry->summary ?? $entry->content ?? '')),
+                    'published_at' => (string) $entry->updated,
+                ];
+            }
+        }
+
+        return $articles;
+    }
+
     private function validateRssUrl(string $url): void
     {
         $response = Http::timeout(10)->get($url);
 
-        abort_if(! $response->successful(), 422, 'The URL could not be reached.');
+        abort_if(! $response->successful(), 422, 'L\'URL est inaccessible.');
 
         $contentType = $response->header('Content-Type') ?? '';
         $body = $response->body();
@@ -84,6 +185,6 @@ class FeedController extends Controller
         $isRss  = str_contains($contentType, 'rss') || str_contains($contentType, 'xml') || str_contains($contentType, 'atom');
         $hasRssTag = str_contains($body, '<rss') || str_contains($body, '<feed') || str_contains($body, '<channel');
 
-        abort_if(! $isRss && ! $hasRssTag, 422, 'The URL does not point to a valid RSS or Atom feed.');
+        abort_if(! $isRss && ! $hasRssTag, 422, 'L\'URL ne pointe pas vers un flux RSS ou Atom valide.');
     }
 }

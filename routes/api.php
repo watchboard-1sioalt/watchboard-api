@@ -36,9 +36,13 @@ Route::prefix('tags')->controller(TagsController::class)->group(function () {
 Route::middleware('auth:api')->prefix('feeds')->controller(FeedController::class)->group(function () {
     Route::get('/', 'index');
     Route::post('/', 'store');
+    Route::get('/articles', 'allArticles');
     Route::get('/{id}', 'show');
     Route::put('/{id}', 'update');
     Route::delete('/{id}', 'destroy');
+    Route::get('/{id}/articles', 'articles');
+    Route::post('/{id}/tags', 'attachTag');
+    Route::delete('/{id}/tags/{tagId}', 'detachTag');
 });
 
 Route::middleware('auth:api')->prefix('ressources')->controller(RessourceController::class)->group(function () {
