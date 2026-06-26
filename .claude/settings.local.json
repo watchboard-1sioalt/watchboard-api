@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls /home/thomas/watchboard-api/vendor/laravel/framework/src/Illuminate/Database/Connectors/Concerns/ 2>/dev/null || echo \"Dossier absent\")",
+      "Read(//home/thomas/watchboard-api/vendor/laravel/framework/src/Illuminate/Database/Connectors/**)"
+    ]
+  }
+}
