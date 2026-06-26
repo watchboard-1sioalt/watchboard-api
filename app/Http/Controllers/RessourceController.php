@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Ressources;
+use App\Models\Utilisateurs;
 use App\Services\ResumeService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -133,6 +134,80 @@ class RessourceController extends Controller
     {
         Ressources::findOrFail($id)->tags()->detach($tagId);
         return response()->json(null, 204);
+    }
+
+    public function share(Request $request, int $id): JsonResponse
+    {
+        $ressource = Ressources::findOrFail($id);
+
+        if ($ressource->id_utilisateur !== Auth::id()) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
+        $validated = $request->validate([
+            'email' => 'required|email',
+        ]);
+
+        $destinataire = Utilisateurs::where('email', $validated['email'])->first();
+
+        if (!$destinataire) {
+            return response()->json(['message' => 'Aucun compte trouvé pour cet email.'], 404);
+        }
+
+        if ($destinataire->id_utilisateur === Auth::id()) {
+            return response()->json(['message' => 'Vous ne pouvez pas partager une ressource avec vous-même.'], 422);
+        }
+
+        $ressource->partages()->syncWithoutDetaching([$destinataire->id_utilisateur]);
+
+        return response()->json(null, 204);
+    }
+
+    public function sharedWithMe(): JsonResponse
+    {
+        $ressources = Auth::user()->ressourcesPartagees()->with('tags')->get();
+        return response()->json($ressources);
+    }
+
+    public function ignoreShare(int $id): JsonResponse
+    {
+        $ressource = Ressources::findOrFail($id);
+
+        $detached = $ressource->partages()->detach(Auth::id());
+
+        if (!$detached) {
+            return response()->json(['message' => 'Cette ressource ne vous a pas été partagée.'], 404);
+        }
+
+        return response()->json(null, 204);
+    }
+
+    public function duplicateShare(int $id): JsonResponse
+    {
+        $userId = Auth::id();
+        $original = Ressources::with('tags')->findOrFail($id);
+
+        if (!$original->partages()->where('id_utilisateur', $userId)->exists()) {
+            return response()->json(['message' => 'Cette ressource ne vous a pas été partagée.'], 404);
+        }
+
+        $copie = Ressources::create([
+            'type'           => $original->type,
+            'url'            => $original->url,
+            'nom_original'   => $original->nom_original,
+            'image'          => $original->image,
+            'resume'         => $original->resume,
+            'id_utilisateur' => $userId,
+            'id_fluxrss'     => $original->id_fluxrss,
+        ]);
+
+        if ($original->tags->isNotEmpty()) {
+            $copie->tags()->attach($original->tags->pluck('id_tag'));
+        }
+
+        $original->partages()->detach($userId);
+
+        return response()->json($copie->load('tags'), 201);
     }
 
     public function generateResume(int $id): JsonResponse
