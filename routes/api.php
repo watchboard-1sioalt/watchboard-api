@@ -50,6 +50,7 @@ Route::middleware('auth:api')->prefix('admin')->controller(AdminController::clas
     Route::get('users', 'users');
     Route::get('users/{id}', 'user');
     Route::put('users/{id}/validate', 'validate');
+    Route::put('users/{id}/disable', 'disable');
 });
 
 Route::middleware('auth:api')->prefix('ressources')->controller(RessourceController::class)->group(function () {
