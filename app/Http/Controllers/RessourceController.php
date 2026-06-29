@@ -64,7 +64,7 @@ class RessourceController extends Controller
     public function storeFromFile(Request $request): JsonResponse
     {
         $request->validate([
-            'file' => 'required|file|mimes:txt,md,pdf|max:5120',
+            'file' => 'required|file|mimes:txt,pdf,jpg,jpeg,png,mp3,mp4,docx|max:51200',
         ]);
 
         $file = $request->file('file');
