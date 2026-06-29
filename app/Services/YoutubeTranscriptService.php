@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Process;
 
 class YoutubeTranscriptService
 {
@@ -13,31 +13,83 @@ class YoutubeTranscriptService
             return null;
         }
 
-        $response = Http::withHeaders([
-            'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Accept-Language' => 'fr-FR,fr;q=0.9,en;q=0.8',
-        ])->get("https://www.youtube.com/watch?v={$videoId}");
+        $tmpDir = sys_get_temp_dir() . '/yt_transcript_' . uniqid();
+        mkdir($tmpDir, 0700, true);
 
-        if (!$response->successful()) {
-            return null;
+        try {
+            return $this->fetchViaYtDlp($videoId, $tmpDir);
+        } finally {
+            $this->cleanup($tmpDir);
+        }
+    }
+
+    private function fetchViaYtDlp(string $videoId, string $tmpDir): ?string
+    {
+        $ytUrl = "https://www.youtube.com/watch?v={$videoId}";
+        $output = $tmpDir . '/%(id)s';
+
+        $result = Process::timeout(60)->run([
+            'yt-dlp',
+            '--write-subs',
+            '--write-auto-subs',
+            '--sub-langs', 'fr,en',
+            '--sub-format', 'vtt',
+            '--skip-download',
+            '--no-warnings',
+            '-o', $output,
+            $ytUrl,
+        ]);
+
+        // Priority: fr (manual) > en (manual) > fr (auto) > en (auto) > any
+        $candidates = [
+            "{$tmpDir}/{$videoId}.fr.vtt",
+            "{$tmpDir}/{$videoId}.en.vtt",
+        ];
+
+        foreach ($candidates as $path) {
+            if (file_exists($path) && filesize($path) > 0) {
+                return $this->parseVtt(file_get_contents($path));
+            }
         }
 
-        $captionTracks = $this->extractCaptionTracks($response->body());
-        if (empty($captionTracks)) {
-            return null;
+        // Fallback: pick any .vtt file found
+        $files = glob("{$tmpDir}/*.vtt") ?: [];
+        foreach ($files as $path) {
+            if (filesize($path) > 0) {
+                return $this->parseVtt(file_get_contents($path));
+            }
         }
 
-        $transcriptUrl = $this->selectBestTrack($captionTracks);
-        if (!$transcriptUrl) {
-            return null;
+        return null;
+    }
+
+    private function parseVtt(string $vtt): ?string
+    {
+        // Strip word-level timing tags: <00:00:01.120><c>word</c> → word
+        $vtt = preg_replace('/<[^>]+>/', '', $vtt);
+
+        $lines = explode("\n", $vtt);
+        $texts = [];
+        $seen = [];
+
+        foreach ($lines as $line) {
+            $line = trim($line);
+
+            // Skip header, timestamps, and empty lines
+            if ($line === '' || $line === 'WEBVTT' || str_contains($line, '-->') ||
+                preg_match('/^(Kind|Language):/', $line)) {
+                continue;
+            }
+
+            // Deduplicate: YouTube VTT repeats previous caption text in each cue
+            if (!isset($seen[$line])) {
+                $seen[$line] = true;
+                $texts[] = $line;
+            }
         }
 
-        $transcriptResponse = Http::get($transcriptUrl);
-        if (!$transcriptResponse->successful()) {
-            return null;
-        }
-
-        return $this->parseTranscriptXml($transcriptResponse->body());
+        $result = implode(' ', $texts);
+        return $result !== '' ? $result : null;
     }
 
     private function extractVideoId(string $url): ?string
@@ -48,88 +100,12 @@ class YoutubeTranscriptService
         return null;
     }
 
-    private function extractCaptionTracks(string $html): array
+    private function cleanup(string $dir): void
     {
-        $start = strpos($html, '"captionTracks":');
-        if ($start === false) {
-            return [];
+        if (!is_dir($dir)) return;
+        foreach (glob("{$dir}/*") ?: [] as $file) {
+            @unlink($file);
         }
-
-        $start += strlen('"captionTracks":');
-        $arrayStart = strpos($html, '[', $start);
-        if ($arrayStart === false) {
-            return [];
-        }
-
-        // Balance brackets to find the end of the array
-        $depth = 0;
-        $end = $arrayStart;
-        $len = strlen($html);
-
-        for ($i = $arrayStart; $i < $len; $i++) {
-            $char = $html[$i];
-            if ($char === '[' || $char === '{') {
-                $depth++;
-            } elseif ($char === ']' || $char === '}') {
-                $depth--;
-                if ($depth === 0) {
-                    $end = $i;
-                    break;
-                }
-            }
-        }
-
-        $json = substr($html, $arrayStart, $end - $arrayStart + 1);
-        return json_decode($json, true) ?? [];
-    }
-
-    private function selectBestTrack(array $tracks): ?string
-    {
-        $priorities = ['fr', 'en'];
-
-        // Prefer non-auto-generated tracks first
-        foreach ($priorities as $lang) {
-            foreach ($tracks as $track) {
-                $code = $track['languageCode'] ?? '';
-                $isAsr = str_starts_with($track['vssId'] ?? '', 'a.');
-                if (str_starts_with($code, $lang) && !$isAsr) {
-                    return $track['baseUrl'] ?? null;
-                }
-            }
-        }
-
-        // Fall back to auto-generated tracks
-        foreach ($priorities as $lang) {
-            foreach ($tracks as $track) {
-                if (str_starts_with($track['languageCode'] ?? '', $lang)) {
-                    return $track['baseUrl'] ?? null;
-                }
-            }
-        }
-
-        // Take whatever is available
-        return $tracks[0]['baseUrl'] ?? null;
-    }
-
-    private function parseTranscriptXml(string $xml): ?string
-    {
-        libxml_use_internal_errors(true);
-        $parsed = simplexml_load_string($xml);
-        libxml_clear_errors();
-
-        if (!$parsed) {
-            return null;
-        }
-
-        $texts = [];
-        foreach ($parsed->text as $text) {
-            $decoded = html_entity_decode((string) $text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-            $cleaned = preg_replace('/\s+/', ' ', trim($decoded));
-            if ($cleaned !== '') {
-                $texts[] = $cleaned;
-            }
-        }
-
-        return implode(' ', $texts) ?: null;
+        @rmdir($dir);
     }
 }
