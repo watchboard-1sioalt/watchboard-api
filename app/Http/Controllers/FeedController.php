@@ -182,8 +182,9 @@ class FeedController extends Controller
                     $media = $entry->children('http://search.yahoo.com/mrss/');
                     if (isset($media->group)) {
                         $groupMedia = $media->group->children('http://search.yahoo.com/mrss/');
-                        if (isset($groupMedia->thumbnail['url'])) {
-                            $image = (string) $groupMedia->thumbnail['url'];
+                        $thumbAttrs = $groupMedia->thumbnail->attributes();
+                        if (isset($thumbAttrs['url'])) {
+                            $image = (string) $thumbAttrs['url'];
                         }
                         if (isset($groupMedia->description)) {
                             $description = strip_tags((string) $groupMedia->description);
