@@ -161,7 +161,10 @@ class FeedController extends Controller
                     'feed_logo'    => $logo,
                 ];
             }
+        // Format RSS Atom pour les flux rss youtube
         } elseif (isset($xml->entry)) {
+            $isYoutube = str_contains($feed->url, 'youtube.com/feeds/');
+
             foreach ($xml->entry as $entry) {
                 $link = '';
                 foreach ($entry->link as $l) {
@@ -170,12 +173,31 @@ class FeedController extends Controller
                         break;
                     }
                 }
+
+                $image       = null;
+                $description = strip_tags((string) ($entry->summary ?? $entry->content ?? ''));
+                $publishedAt = (string) $entry->updated;
+
+                if ($isYoutube) {
+                    $media = $entry->children('http://search.yahoo.com/mrss/');
+                    if (isset($media->group)) {
+                        $groupMedia = $media->group->children('http://search.yahoo.com/mrss/');
+                        if (isset($groupMedia->thumbnail['url'])) {
+                            $image = (string) $groupMedia->thumbnail['url'];
+                        }
+                        if (isset($groupMedia->description)) {
+                            $description = strip_tags((string) $groupMedia->description);
+                        }
+                    }
+                    $publishedAt = (string) ($entry->published ?: $entry->updated);
+                }
+
                 $articles[] = $meta + [
                     'title'        => (string) $entry->title,
                     'url'          => $link,
-                    'description'  => strip_tags((string) ($entry->summary ?? $entry->content ?? '')),
-                    'published_at' => (string) $entry->updated,
-                    'image'        => null,
+                    'description'  => $description,
+                    'published_at' => $publishedAt,
+                    'image'        => $image,
                     'feed_logo'    => null,
                 ];
             }
