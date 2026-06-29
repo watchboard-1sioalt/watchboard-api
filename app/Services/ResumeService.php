@@ -39,7 +39,7 @@ class ResumeService
         }
 
         return retry(3, function () use ($prompt) {
-            $result = Gemini::generativeModel('models/gemini-1.5-flash')->generateContent($prompt);
+            $result = Gemini::generativeModel('models/gemini-2.5-flash-lite')->generateContent($prompt);
             return $result->text();
         }, sleepMilliseconds: 2000);
     }
