@@ -50,7 +50,7 @@ class AuthController extends Controller
         $data = $request->validate([
             'nom'    => 'sometimes|string|max:255',
             'prenom' => 'sometimes|string|max:255',
-            'email'  => 'sometimes|email|max:255|unique:utilisateurs,email,' . $user->id_utilisateur,
+            'email'  => 'sometimes|email|max:255|unique:utilisateurs,email,' . $user->id_utilisateur . ',id_utilisateur',
         ]);
 
         $user->update($data);
