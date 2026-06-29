@@ -32,7 +32,7 @@ Route::prefix('tags')->controller(TagsController::class)->group(function () {
         Route::delete('delete', 'delete');
 
         Route::post('createpublic', 'createPublic');
-        Route::patch('editPublic', 'editPublic');
+        Route::patch('editpublic', 'editPublic');
         Route::delete('deletepublic', 'deletePublic');
     });
 });
