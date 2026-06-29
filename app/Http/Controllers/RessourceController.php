@@ -85,12 +85,14 @@ class RessourceController extends Controller
         $request->validate([
             'url'          => ['required', 'url', 'regex:/(youtube\.com|youtu\.be)/'],
             'nom_original' => 'nullable|string|max:150',
+            'image'        => 'nullable|url|max:2048',
         ]);
 
         $ressource = Ressources::create([
             'type'           => 'youtube',
             'url'            => $request->input('url'),
             'nom_original'   => $request->input('nom_original'),
+            'image'          => $request->input('image'),
             'id_utilisateur' => Auth::id(),
         ]);
 
