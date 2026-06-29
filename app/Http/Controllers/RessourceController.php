@@ -193,7 +193,7 @@ class RessourceController extends Controller
         $userId = Auth::id();
         $original = Ressources::with('tags')->findOrFail($id);
 
-        if (!$original->partages()->where('id_utilisateur', $userId)->exists()) {
+        if (!$original->partages()->where('partager.id_utilisateur', $userId)->exists()) {
             return response()->json(['message' => 'Cette ressource ne vous a pas été partagée.'], 404);
         }
 
