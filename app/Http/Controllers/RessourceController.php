@@ -48,8 +48,10 @@ class RessourceController extends Controller
             'resume'       => 'nullable|string',
         ]);
 
+        $isYoutube = (bool) preg_match('#(youtube\.com|youtu\.be)#i', $validated['url']);
+
         $ressource = Ressources::create([
-            'type'           => 'rss',
+            'type'           => $isYoutube ? 'youtube' : 'rss',
             'url'            => $validated['url'],
             'nom_original'   => $validated['nom_original'] ?? null,
             'image'          => $validated['image'] ?? null,

@@ -218,6 +218,7 @@ class FeedController extends Controller
                 $image = ($enclosure && isset($enclosure['url'])) ? (string) $enclosure['url'] : null;
 
                 $articles[] = $meta + [
+                    'type'         => 'rss',
                     'title'        => (string) $item->title,
                     'url'          => (string) $item->link,
                     'description'  => strip_tags((string) $item->description),
@@ -259,6 +260,7 @@ class FeedController extends Controller
                 }
 
                 $articles[] = $meta + [
+                    'type'         => $isYoutube ? 'youtube' : 'rss',
                     'title'        => (string) $entry->title,
                     'url'          => $link,
                     'description'  => $description,
