@@ -24,15 +24,80 @@ class FeedController extends Controller
             'name' => 'nullable|string|max:150',
         ]);
 
-        $this->validateRssUrl($validated['url']);
+        $url = $validated['url'];
+
+        if (preg_match('#(youtube\.com|youtu\.be)#i', $url)) {
+            $url = $this->resolveYoutubeChannelRss($url);
+        }
+
+        $this->validateRssUrl($url);
 
         $feed = FluxRss::create([
-            'url'            => $validated['url'],
+            'url'            => $url,
             'name'           => $validated['name'] ?? null,
             'id_utilisateur' => Auth::id(),
         ]);
 
         return response()->json($feed, 201);
+    }
+
+    private function resolveYoutubeChannelRss(string $url): string
+    {
+        // Déjà une URL de flux YouTube
+        if (str_contains($url, 'feeds/videos.xml')) {
+            return $url;
+        }
+
+        // youtube.com/channel/UCxxxxxx — extraction directe sans requête
+        if (preg_match('#youtube\.com/channel/(UC[\w-]+)#i', $url, $m)) {
+            return 'https://www.youtube.com/feeds/videos.xml?channel_id=' . $m[1];
+        }
+
+        // Normalise vers www.youtube.com pour éviter les redirects manqués
+        $url = preg_replace('#^https?://(www\.)?youtube\.com#i', 'https://www.youtube.com', $url);
+        // Supprime le slash final
+        $url = rtrim($url, '/');
+
+        $body = $this->fetchYoutubePage($url);
+
+        // YouTube injecte le lien RSS dans le <head>
+        if (preg_match('#feeds/videos\.xml\?channel_id=(UC[\w-]+)#', $body, $m)) {
+            return 'https://www.youtube.com/feeds/videos.xml?channel_id=' . $m[1];
+        }
+
+        // Fallbacks JSON embarqués
+        if (preg_match('#"channelId"\s*:\s*"(UC[\w-]+)"#',  $body, $m) ||
+            preg_match('#"externalId"\s*:\s*"(UC[\w-]+)"#', $body, $m) ||
+            preg_match('#/channel/(UC[\w-]+)#',              $body, $m)) {
+            return 'https://www.youtube.com/feeds/videos.xml?channel_id=' . $m[1];
+        }
+
+        abort(422, 'Impossible de trouver l\'identifiant de la chaîne YouTube.');
+    }
+
+    private function fetchYoutubePage(string $url): string
+    {
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_MAXREDIRS      => 5,
+            CURLOPT_TIMEOUT        => 15,
+            CURLOPT_ENCODING       => '', // décode automatiquement gzip/br/deflate
+            CURLOPT_USERAGENT      => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+            CURLOPT_HTTPHEADER     => [
+                'Accept-Language: en-US,en;q=0.9',
+                'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            ],
+        ]);
+
+        $body   = curl_exec($ch);
+        $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        abort_if($body === false || $status < 200 || $status >= 300, 422, 'Impossible d\'accéder à la page YouTube.');
+
+        return $body;
     }
 
     public function show(int $id): JsonResponse
