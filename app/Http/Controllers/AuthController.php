@@ -78,7 +78,13 @@ class AuthController extends Controller
 
     public function refresh()
     {
-        return $this->respondWithToken(JWTAuth::refresh());
+        try {
+            $newToken = JWTAuth::parseToken()->refresh();
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Token invalide ou expiré'], 401);
+        }
+
+        return $this->respondWithToken($newToken);
     }
 
     public function logout()
