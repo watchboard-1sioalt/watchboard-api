@@ -220,7 +220,10 @@ class RessourceController extends Controller
 
         try {
             $resume = (new ResumeService())->generate($ressource);
-        } catch (\Throwable) {
+        } catch (\RuntimeException $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        } catch (\Throwable $e) {
+            \Log::error('ResumeService failed', ['error' => $e->getMessage(), 'userId' => Auth::id()]);
             return response()->json(['message' => 'Le service de résumé est temporairement indisponible. Veuillez réessayer dans quelques instants.'], 503);
         }
 
