@@ -69,6 +69,7 @@ Route::middleware('auth:api')->prefix('ressources')->controller(RessourceControl
     Route::post('/{id}/tags', 'attachTag');
     Route::delete('/{id}/tags/{tagId}', 'detachTag');
     Route::post('/{id}/resume/generate', 'generateResume');
+    Route::post('/{id}/tags/generate', 'generateTags');
     Route::post('/{id}/share', 'share');
     Route::delete('/{id}/share', 'ignoreShare');
     Route::post('/{id}/share/duplicate', 'duplicateShare');

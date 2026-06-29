@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Ressources;
 use App\Models\Utilisateurs;
+use App\Models\Tags;
 use App\Services\ResumeService;
+use App\Services\TagService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -234,5 +236,42 @@ class RessourceController extends Controller
         $ressource->update(['resume' => $resume]);
 
         return response()->json(['resume' => $resume]);
+    }
+
+    public function generateTags(int $id): JsonResponse
+    {
+        $ressource = Ressources::with('tags')->findOrFail($id);
+
+        if ($ressource->id_utilisateur !== Auth::id()) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
+        try {
+            $generatedTags = (new TagService())->generateTags($ressource);
+        } catch (\RuntimeException $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        } catch (\Throwable $e) {
+            \Log::error('TagService failed', ['error' => $e->getMessage(), 'userId' => Auth::id()]);
+            return response()->json(['message' => 'Le service de tags est temporairement indisponible. Veuillez réessayer dans quelques instants.'], 503);
+        }
+
+        $existingTagNames = $ressource->tags->pluck('tag')->map(fn($t) => strtolower($t))->flip();
+        $userId = Auth::id();
+
+        foreach ($generatedTags as $tagName) {
+            if ($existingTagNames->has($tagName)) {
+                continue;
+            }
+
+            $tag = Tags::firstOrCreate(
+                ['tag' => $tagName, 'id_utilisateur' => $userId],
+                ['public' => false]
+            );
+
+            $ressource->tags()->attach($tag->id_tag);
+            $existingTagNames->put($tagName, true);
+        }
+
+        return response()->json(['tags' => $ressource->fresh('tags')->tags]);
     }
 }
