@@ -102,8 +102,4 @@ class AuthController extends Controller
             'expires_in' => config('jwt.ttl') * 60,
         ]);
     }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 1e76ea504eb59e65b32a65529da46c1594a71037
