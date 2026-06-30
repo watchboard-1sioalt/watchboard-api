@@ -10,6 +10,8 @@ use App\Services\TagService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class RessourceController extends Controller
 {
@@ -241,6 +243,26 @@ class RessourceController extends Controller
         $original->partages()->detach($userId);
 
         return response()->json($copie->load('tags'), 201);
+    }
+
+    public function serveFile(int $id): StreamedResponse
+    {
+        $ressource = Ressources::findOrFail($id);
+        $userId = Auth::id();
+
+        if ($ressource->type !== 'file') {
+            abort(400, 'Cette ressource n\'est pas un fichier.');
+        }
+
+        if ($ressource->id_utilisateur !== $userId && !$ressource->partages()->where('partager.id_utilisateur', $userId)->exists()) {
+            abort(403);
+        }
+
+        if (!Storage::exists($ressource->url)) {
+            abort(404);
+        }
+
+        return Storage::response($ressource->url, $ressource->nom_original);
     }
 
     public function generateResume(int $id): JsonResponse

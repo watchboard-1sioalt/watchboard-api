@@ -76,6 +76,7 @@ Route::middleware('auth:api')->prefix('ressources')->controller(RessourceControl
     Route::post('/from-youtube', 'storeFromYoutube');
     Route::get('/shared-with-me', 'sharedWithMe');
     Route::get('/{id}', 'show');
+    Route::get('/{id}/file', 'serveFile');
     Route::post('/{id}/update', 'update');
     Route::post('/{id}/delete', 'destroy');
     Route::post('/{id}/tags', 'attachTag');
