@@ -42,6 +42,7 @@ Route::middleware('auth:api')->prefix('feeds')->controller(FeedController::class
     Route::get('/', 'index');
     Route::post('/', 'store');
     Route::get('/articles', 'allArticles');
+    Route::get('/articles/discover', 'discover');
     Route::get('/{id}', 'show');
     Route::put('/{id}', 'update');
     Route::delete('/{id}', 'destroy');

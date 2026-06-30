@@ -167,6 +167,44 @@ class FeedController extends Controller
         return response()->json($articles);
     }
 
+    public function discover(): JsonResponse
+    {
+        $threshold = now()->subHours(72);
+
+        $feeds = FluxRss::where('id_utilisateur', Auth::id())->get();
+
+        $fresh = [];
+        $older = [];
+
+        foreach ($feeds as $feed) {
+            foreach ($this->parseFeedArticles($feed) as $article) {
+                $date = $article['published_at'] ?? null;
+                try {
+                    $parsed = $date ? new \DateTime($date) : null;
+                } catch (\Exception) {
+                    $parsed = null;
+                }
+
+                if ($parsed && $parsed >= $threshold) {
+                    $fresh[] = $article + ['_parsed_at' => $parsed->getTimestamp()];
+                } else {
+                    $older[] = $article;
+                }
+            }
+        }
+
+        usort($fresh, fn ($a, $b) => $b['_parsed_at'] <=> $a['_parsed_at']);
+        foreach ($fresh as &$a) {
+            unset($a['_parsed_at']);
+        }
+
+        shuffle($older);
+
+        $result = array_merge($fresh, $older);
+
+        return response()->json($result);
+    }
+
     public function attachTag(Request $request, int $id): JsonResponse
     {
         $feed = FluxRss::where('id_fluxrss', $id)
