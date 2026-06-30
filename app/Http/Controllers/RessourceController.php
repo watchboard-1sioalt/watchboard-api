@@ -15,7 +15,7 @@ class RessourceController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $ressources = Ressources::with('tags')->get();
+        $ressources = Ressources::with('tags')->where('id_utilisateur', Auth::id())->get();
         return response()->json($ressources);
     }
 
@@ -106,12 +106,22 @@ class RessourceController extends Controller
     public function show(int $id): JsonResponse
     {
         $ressource = Ressources::with('tags')->findOrFail($id);
+        $userId = Auth::id();
+
+        if ($ressource->id_utilisateur !== $userId && !$ressource->partages()->where('partager.id_utilisateur', $userId)->exists()) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
         return response()->json($ressource);
     }
 
     public function update(Request $request, int $id): JsonResponse
     {
         $ressource = Ressources::findOrFail($id);
+
+        if ($ressource->id_utilisateur !== Auth::id()) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
 
         $validated = $request->validate([
             'nom_original' => 'sometimes|nullable|string|max:150',
@@ -125,20 +135,37 @@ class RessourceController extends Controller
 
     public function destroy(int $id): JsonResponse
     {
-        Ressources::findOrFail($id)->delete();
+        $ressource = Ressources::findOrFail($id);
+
+        if ($ressource->id_utilisateur !== Auth::id()) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
+        $ressource->delete();
         return response()->json(null, 204);
     }
 
     public function attachTag(Request $request, int $id): JsonResponse
     {
         $ressource = Ressources::findOrFail($id);
+
+        if ($ressource->id_utilisateur !== Auth::id()) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
         $ressource->tags()->syncWithoutDetaching([$request->integer('tag_id')]);
         return response()->json(null, 204);
     }
 
     public function detachTag(int $id, int $tagId): JsonResponse
     {
-        Ressources::findOrFail($id)->tags()->detach($tagId);
+        $ressource = Ressources::findOrFail($id);
+
+        if ($ressource->id_utilisateur !== Auth::id()) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
+        $ressource->tags()->detach($tagId);
         return response()->json(null, 204);
     }
 
