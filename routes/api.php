@@ -4,7 +4,6 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FeedController;
 use App\Http\Controllers\RessourceController;
-use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\SyntheseController;
 use App\Http\Controllers\TagsController;
 use Illuminate\Support\Facades\Route;
@@ -64,6 +63,7 @@ Route::middleware('auth:api')->prefix('syntheses')->controller(SyntheseControlle
     Route::get('/{id}', 'show');
     Route::put('/{id}', 'update');
     Route::delete('/{id}', 'destroy');
+    Route::post('/{id}/generate', 'generate');
     Route::post('/{id}/ressources', 'attachRessource');
     Route::delete('/{id}/ressources/{ressourceId}', 'detachRessource');
 });

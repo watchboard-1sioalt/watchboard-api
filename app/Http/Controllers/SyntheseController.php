@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Ressources;
 use App\Models\Syntheses;
+use App\Services\SyntheseService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -98,6 +99,27 @@ class SyntheseController extends Controller
         $synthese->delete();
 
         return response()->json(null, 204);
+    }
+
+    public function generate(int $id): JsonResponse
+    {
+        $synthese = Syntheses::with('ressources')
+            ->where('id_synthese', $id)
+            ->where('id_utilisateur', Auth::id())
+            ->firstOrFail();
+
+        try {
+            $text = (new SyntheseService())->generate($synthese);
+        } catch (\RuntimeException $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        } catch (\Throwable $e) {
+            \Log::error('SyntheseService failed', ['error' => $e->getMessage(), 'userId' => Auth::id()]);
+            return response()->json(['message' => 'Le service de synthèse est temporairement indisponible. Veuillez réessayer dans quelques instants.'], 503);
+        }
+
+        $synthese->update(['synthese' => $text]);
+
+        return response()->json(['synthese' => $text]);
     }
 
     public function attachRessource(Request $request, int $id): JsonResponse
