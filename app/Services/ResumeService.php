@@ -15,6 +15,11 @@ class ResumeService
 
     public function generate(Ressources $ressource): string
     {
+<<<<<<< HEAD
+        if ($ressource->type === 'file') {
+            $content = Storage::get($ressource->url);
+            $prompt = "Tu es un assistant de veille informationnelle. "
+=======
         $instruction = "Tu es un assistant de veille informationnelle. "
             . "Réponds UNIQUEMENT avec le résumé, sans phrase d'introduction ni d'accroche. "
             . "Ne commence pas par \"Voici\" ou toute autre formule d'introduction. ";
@@ -22,6 +27,7 @@ class ResumeService
         if ($ressource->type === 'file') {
             $content = Storage::get($ressource->url);
             $prompt = $instruction
+>>>>>>> 1e76ea504eb59e65b32a65529da46c1594a71037
                 . "Génère un résumé concis (3 à 5 phrases) de ce document en français.\n\n"
                 . $content;
         } elseif ($ressource->type === 'youtube') {
@@ -34,7 +40,11 @@ class ResumeService
             $header = $ressource->nom_original
                 ? "Titre : {$ressource->nom_original}\n\n"
                 : '';
+<<<<<<< HEAD
+            $prompt = "Tu es un assistant de veille informationnelle. "
+=======
             $prompt = $instruction
+>>>>>>> 1e76ea504eb59e65b32a65529da46c1594a71037
                 . "Génère un résumé concis (3 à 5 phrases) de cette vidéo YouTube en français, "
                 . "en te basant sur sa transcription.\n\n"
                 . $header
@@ -45,20 +55,32 @@ class ResumeService
             $header = "Titre : {$ressource->nom_original}\nURL : {$ressource->url}\n\n";
 
             if ($pageText) {
+<<<<<<< HEAD
+                $prompt = "Tu es un assistant de veille informationnelle. "
+=======
                 $prompt = $instruction
+>>>>>>> 1e76ea504eb59e65b32a65529da46c1594a71037
                     . "Génère un résumé concis (3 à 5 phrases) de cet article ou page web en français.\n\n"
                     . $header
                     . "Contenu :\n"
                     . $pageText;
             } else {
+<<<<<<< HEAD
+                $prompt = "Tu es un assistant de veille informationnelle. "
+=======
                 $prompt = $instruction
+>>>>>>> 1e76ea504eb59e65b32a65529da46c1594a71037
                     . "Génère un résumé concis (3 à 5 phrases) de cette ressource en français "
                     . "en te basant uniquement sur son titre et son URL.\n\n"
                     . $header;
             }
         } else {
             $context = "Titre : {$ressource->nom_original}\nURL : {$ressource->url}";
+<<<<<<< HEAD
+            $prompt = "Tu es un assistant de veille informationnelle. "
+=======
             $prompt = $instruction
+>>>>>>> 1e76ea504eb59e65b32a65529da46c1594a71037
                 . "Génère un résumé concis (3 à 5 phrases) de cette ressource en français.\n\n"
                 . $context;
         }
