@@ -5,6 +5,10 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FeedController;
 use App\Http\Controllers\RessourceController;
 use App\Http\Controllers\SettingsController;
+<<<<<<< HEAD
+=======
+use App\Http\Controllers\SyntheseController;
+>>>>>>> 1e76ea504eb59e65b32a65529da46c1594a71037
 use App\Http\Controllers\TagsController;
 use Illuminate\Support\Facades\Route;
 
@@ -56,6 +60,19 @@ Route::middleware('auth:api')->prefix('admin')->controller(AdminController::clas
     Route::put('users/{id}/disable', 'disable');
 });
 
+<<<<<<< HEAD
+=======
+Route::middleware('auth:api')->prefix('syntheses')->controller(SyntheseController::class)->group(function () {
+    Route::get('/', 'index');
+    Route::post('/', 'store');
+    Route::get('/{id}', 'show');
+    Route::put('/{id}', 'update');
+    Route::delete('/{id}', 'destroy');
+    Route::post('/{id}/ressources', 'attachRessource');
+    Route::delete('/{id}/ressources/{ressourceId}', 'detachRessource');
+});
+
+>>>>>>> 1e76ea504eb59e65b32a65529da46c1594a71037
 Route::middleware('auth:api')->prefix('ressources')->controller(RessourceController::class)->group(function () {
     Route::get('/', 'index');
     Route::post('/create', 'store');

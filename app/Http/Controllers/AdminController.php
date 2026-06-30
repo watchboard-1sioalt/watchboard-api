@@ -12,8 +12,8 @@ class AdminController extends Controller {
     public function users()
     {
         $utilisateurs = Utilisateurs::select(
-            'id_utilisateur', 'nom', 'prenom', 'email', 'admin', 'validation'
-        )->get();
+            'id_utilisateur', 'nom', 'prenom', 'email', 'admin', 'validation', 'created_at'
+        )->orderByDesc('created_at')->get();
 
         return response()->json($utilisateurs);
     }
@@ -21,7 +21,7 @@ class AdminController extends Controller {
     public function user($id)
     {
         $utilisateur = Utilisateurs::select(
-            'id_utilisateur', 'nom', 'prenom', 'email', 'admin', 'validation'
+            'id_utilisateur', 'nom', 'prenom', 'email', 'admin', 'validation', 'created_at'
         )->findOrFail($id);
 
         return response()->json($utilisateur);
@@ -34,7 +34,7 @@ class AdminController extends Controller {
         $utilisateur->save();
 
         return response()->json($utilisateur->only(
-            'id_utilisateur', 'nom', 'prenom', 'email', 'admin', 'validation'
+            'id_utilisateur', 'nom', 'prenom', 'email', 'admin', 'validation', 'created_at'
         ));
     }
 
@@ -45,7 +45,7 @@ class AdminController extends Controller {
         $utilisateur->save();
 
         return response()->json($utilisateur->only(
-            'id_utilisateur', 'nom', 'prenom', 'email', 'admin', 'validation'
+            'id_utilisateur', 'nom', 'prenom', 'email', 'admin', 'validation', 'created_at'
         ));
     }
 }
