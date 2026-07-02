@@ -69,7 +69,7 @@ class SyntheseController extends Controller
             'ressource_ids'   => 'sometimes|array|min:2',
             'ressource_ids.*' => 'integer|exists:ressources,id_ressource',
         ]);
-
+enregistrées
         if (isset($validated['ressource_ids'])) {
             $count = Ressources::whereIn('id_ressource', $validated['ressource_ids'])
                 ->where('id_utilisateur', Auth::id())

@@ -89,7 +89,11 @@ class AuthController extends Controller
 
     public function logout()
     {
-        JWTAuth::invalidate();
+        try {
+            JWTAuth::parseToken()->invalidate();
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Token invalide ou expiré'], 401);
+        }
 
         return response()->json(['message' => 'Déconnexion réussie']);
     }
